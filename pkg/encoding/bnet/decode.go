@@ -8,6 +8,9 @@ import (
 	"strconv"
 )
 
+// Unmarshal parses the BNET-encoded data and stores the result in the
+// value pointed to by v. If v is nil or not a pointer, Unmarshal
+// returns an InvalidUnmarshalError.
 func Unmarshal(data []byte, v interface{}) error {
 	var d decodeState
 
@@ -15,10 +18,16 @@ func Unmarshal(data []byte, v interface{}) error {
 	return d.unmarshal(v)
 }
 
+// Unmarshaler is the interface implemented by types that can unmarshal a
+// BNET description of themselves. The input can be assumed to be a valid
+// encoding of a JSON value. UnmarshalBNET must copy the BNET data if it
+// wishes to retain the data after returning.
 type Unmarshaler interface {
 	UnmarshalBNet([]byte) error
 }
 
+// An UnmarshalTypeError occurs when the attempting to unmarshal a type
+// unknown to the Unmarshaller.
 type UnmarshalTypeError struct {
 	Value  string
 	Type   reflect.Type
@@ -34,6 +43,8 @@ func (e *UnmarshalTypeError) Error() string {
 	return "bnet: cannot unmarshal " + e.Value + " into Go value of type " + e.Type.String()
 }
 
+// An InvalidUnmarshalError occurs when attempting to unmarshal into a
+// non-pointer or nil variable.
 type InvalidUnmarshalError struct {
 	Type reflect.Type
 }
