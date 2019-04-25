@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 )
 
+// Marshal returns the BNET encoding of v.
 func Marshal(v interface{}) ([]byte, error) {
 	e := &encodeState{}
 	err := e.marshal(v)
@@ -19,19 +20,14 @@ func Marshal(v interface{}) ([]byte, error) {
 	return e.Bytes(), nil
 }
 
+// Marshaler is the interface implemented by types that can marshal
+// themselves into valid BNET.
 type Marshaler interface {
 	MarshalBNet() ([]byte, error)
 }
 
-type MarshalerError struct {
-	Type reflect.Type
-	Err  error
-}
-
-func (e *MarshalerError) Error() string {
-	return "bnet: error calling MarshalBnet for type " + e.Type.String() + ": " + e.Err.Error()
-}
-
+// An UnsupportedTypeError occurs when attempting to marshal an
+// unsupported type.
 type UnsupportedTypeError struct {
 	Type reflect.Type
 }
@@ -46,18 +42,6 @@ type encodeState struct {
 	tagCache map[string]string
 }
 
-// var encodeStatePool sync.Pool
-
-/*
-func newEncodeState() *encodeState {
-	if v := encodeStatePool.Get(); v != nil {
-		e := v.(*encodeState)
-		e.buf.Reset()
-		return e
-	}
-	return new(encodeState)
-}
-*/
 func (e *encodeState) Bytes() []byte {
 	return e.buf.Bytes()
 }
@@ -328,27 +312,6 @@ func (pe *ptrEncoder) encode(e *encodeState, v reflect.Value) {
 	}
 	pe.ptrEnc(e, v.Elem())
 }
-
-/*
-func isValidTag(s string) bool {
-	if s == "" {
-		return false
-	}
-	for _, c := range s {
-		switch {
-		case strings.ContainsRune("!#$%&()*+-./:<=>?@[]^_{|}~ ", c):
-			// Backslash and quote chars are reserved, but
-			// otherwise any punctuation chars are allowed
-			// in a tag name.
-		default:
-			if !unicode.IsLetter(c) && !unicode.IsDigit(c) {
-				return false
-			}
-		}
-	}
-	return true
-}
-*/
 
 func fieldByIndex(v reflect.Value, index []int) (*reflect.Value, error) {
 	for _, i := range index {
