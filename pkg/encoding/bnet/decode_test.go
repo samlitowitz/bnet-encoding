@@ -1,6 +1,7 @@
-package bnet
+package bnet_test
 
 import (
+	"github.com/samlitowitz/bnet-encoding/pkg/encoding/bnet"
 	"testing"
 
 	"github.com/go-test/deep"
@@ -9,7 +10,7 @@ import (
 func TestUnmarshalSupportedTypes(t *testing.T) {
 	var out supportedTypes
 
-	err := Unmarshal(supportedTypesTests.encoded, &out)
+	err := bnet.Unmarshal(supportedTypesTests.encoded, &out)
 	if err != nil {
 		panic(err)
 	}
